@@ -15,7 +15,7 @@ class ParamodApp extends StatelessWidget {
   Widget build(BuildContext context) {
     return MaterialApp(
       debugShowCheckedModeBanner: false,
-      title: 'Paramod Gaming Utility V2',
+      title: 'ARYA-MOD X',
       theme: ThemeData(
         useMaterial3: true,
         brightness: Brightness.dark,
@@ -25,7 +25,7 @@ class ParamodApp extends StatelessWidget {
           brightness: Brightness.dark,
         ),
       ),
-      home: const MainScreen(),
+      home: LoginPage(),
     );
   }
 }
@@ -561,6 +561,147 @@ class _SettingsPageState extends State<SettingsPage> {
           style: TextStyle(color: muted, fontSize: 12),
         ),
       ],
+    );
+  }
+}
+
+
+// Basic local login for ARYA-MOD X.
+// For real security, use server-side authentication instead of embedded credentials.
+class LoginPage extends StatefulWidget {
+  @override
+  State<LoginPage> createState() => _LoginPageState();
+}
+
+class _LoginPageState extends State<LoginPage> {
+  final TextEditingController _username = TextEditingController();
+  final TextEditingController _password = TextEditingController();
+  bool _hidePassword = true;
+  String? _error;
+
+  void _login() {
+    if (_username.text.trim() == 'ARYAMOD' &&
+        _password.text == 'ARYAMOD-X') {
+      Navigator.of(context).pushReplacement(
+        MaterialPageRoute(builder: (_) => MainScreen()),
+      );
+    } else {
+      setState(() => _error = 'Incorrect username or password');
+    }
+  }
+
+  @override
+  void dispose() {
+    _username.dispose();
+    _password.dispose();
+    super.dispose();
+  }
+
+  @override
+  Widget build(BuildContext context) {
+    return Scaffold(
+      body: Container(
+        width: double.infinity,
+        decoration: const BoxDecoration(
+          gradient: LinearGradient(
+            colors: [Color(0xFF090D1A), Color(0xFF18264A), Color(0xFF090D1A)],
+            begin: Alignment.topLeft,
+            end: Alignment.bottomRight,
+          ),
+        ),
+        child: SafeArea(
+          child: Center(
+            child: SingleChildScrollView(
+              padding: const EdgeInsets.all(24),
+              child: ConstrainedBox(
+                constraints: const BoxConstraints(maxWidth: 420),
+                child: Card(
+                  color: const Color(0xFF151B2E),
+                  shape: RoundedRectangleBorder(
+                    borderRadius: BorderRadius.circular(24),
+                    side: const BorderSide(color: Color(0xFF39486D)),
+                  ),
+                  child: Padding(
+                    padding: const EdgeInsets.all(26),
+                    child: Column(
+                      mainAxisSize: MainAxisSize.min,
+                      children: [
+                        const Icon(Icons.bolt, size: 64, color: Colors.cyanAccent),
+                        const SizedBox(height: 12),
+                        const Text(
+                          'ARYA-MOD X',
+                          textAlign: TextAlign.center,
+                          style: TextStyle(
+                            color: Colors.white,
+                            fontSize: 28,
+                            fontWeight: FontWeight.bold,
+                            letterSpacing: 2,
+                          ),
+                        ),
+                        const SizedBox(height: 8),
+                        const Text(
+                          'Sign in to continue',
+                          style: TextStyle(color: Colors.white70),
+                        ),
+                        const SizedBox(height: 28),
+                        TextField(
+                          controller: _username,
+                          style: const TextStyle(color: Colors.white),
+                          textInputAction: TextInputAction.next,
+                          decoration: const InputDecoration(
+                            labelText: 'Username',
+                            prefixIcon: Icon(Icons.person_outline),
+                            border: OutlineInputBorder(),
+                          ),
+                        ),
+                        const SizedBox(height: 16),
+                        TextField(
+                          controller: _password,
+                          obscureText: _hidePassword,
+                          style: const TextStyle(color: Colors.white),
+                          onSubmitted: (_) => _login(),
+                          decoration: InputDecoration(
+                            labelText: 'Password',
+                            prefixIcon: const Icon(Icons.lock_outline),
+                            border: const OutlineInputBorder(),
+                            suffixIcon: IconButton(
+                              onPressed: () => setState(
+                                () => _hidePassword = !_hidePassword,
+                              ),
+                              icon: Icon(
+                                _hidePassword
+                                    ? Icons.visibility
+                                    : Icons.visibility_off,
+                              ),
+                            ),
+                          ),
+                        ),
+                        if (_error != null) ...[
+                          const SizedBox(height: 12),
+                          Text(
+                            _error!,
+                            style: const TextStyle(color: Colors.redAccent),
+                          ),
+                        ],
+                        const SizedBox(height: 24),
+                        SizedBox(
+                          width: double.infinity,
+                          height: 50,
+                          child: ElevatedButton.icon(
+                            onPressed: _login,
+                            icon: const Icon(Icons.login),
+                            label: const Text('LOGIN'),
+                          ),
+                        ),
+                      ],
+                    ),
+                  ),
+                ),
+              ),
+            ),
+          ),
+        ),
+      ),
     );
   }
 }

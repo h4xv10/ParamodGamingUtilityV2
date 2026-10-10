@@ -29,6 +29,9 @@ jobs:
       - name: Create Flutter project
         run: flutter create --platforms=android --org com.paramod.gaming utility_build
 
+      - name: Set app name
+        run: sed -i 's/android:label="[^"]*"/android:label="ARYA-MOD X"/' utility_build/android/app/src/main/AndroidManifest.xml
+
       - name: Install app screen
         run: cp lib/main.dart utility_build/lib/main.dart
 
