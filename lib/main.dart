@@ -1,3 +1,4 @@
+import 'dart:async';
 import 'dart:math';
 import 'package:flutter/material.dart';
 
@@ -288,11 +289,210 @@ class WeaponsPage extends StatelessWidget {
   }
 }
 
+
 class AimPage extends StatefulWidget {
   const AimPage({super.key});
 
   @override
   State<AimPage> createState() => _AimPageState();
+}
+
+class _AimPageState extends State<AimPage> {
+  int score = 0;
+  int round = 0;
+  int secondsLeft = 30;
+  bool running = false;
+  Timer? timer;
+  final random = Random();
+  double targetX = 0;
+  double targetY = 0;
+
+  void startGame() {
+    if (running) return;
+    if (secondsLeft <= 0) {
+      setState(() {
+        score = 0;
+        round = 0;
+        secondsLeft = 30;
+      });
+    }
+    setState(() => running = true);
+    timer?.cancel();
+    timer = Timer.periodic(const Duration(seconds: 1), (t) {
+      if (!mounted) {
+        t.cancel();
+        return;
+      }
+      if (secondsLeft <= 1) {
+        t.cancel();
+        setState(() {
+          secondsLeft = 0;
+          running = false;
+        });
+      } else {
+        setState(() => secondsLeft--);
+      }
+    });
+  }
+
+  void stopGame() {
+    timer?.cancel();
+    setState(() => running = false);
+  }
+
+  void resetGame() {
+    timer?.cancel();
+    setState(() {
+      score = 0;
+      round = 0;
+      secondsLeft = 30;
+      running = false;
+      targetX = 0;
+      targetY = 0;
+    });
+  }
+
+  void hitTarget() {
+    if (!running) return;
+    setState(() {
+      score += 10;
+      round++;
+      targetX = (random.nextDouble() * 1.4) - 0.7;
+      targetY = (random.nextDouble() * 1.4) - 0.7;
+    });
+  }
+
+  @override
+  void dispose() {
+    timer?.cancel();
+    super.dispose();
+  }
+
+  @override
+  Widget build(BuildContext context) {
+    return Padding(
+      padding: const EdgeInsets.all(20),
+      child: Column(
+        crossAxisAlignment: CrossAxisAlignment.start,
+        children: [
+          const Text('AIM LAB 2.0', style: TextStyle(
+            fontSize: 27, fontWeight: FontWeight.w900,
+          )),
+          const SizedBox(height: 8),
+          const Text('30-second reaction and accuracy challenge.',
+            style: TextStyle(color: muted)),
+          const SizedBox(height: 18),
+          Row(children: [
+            _stat('SCORE', '$score'),
+            const SizedBox(width: 8),
+            _stat('HITS', '$round'),
+            const SizedBox(width: 8),
+            _stat('TIME', '${secondsLeft}s'),
+          ]),
+          const SizedBox(height: 16),
+          Expanded(
+            child: Container(
+              width: double.infinity,
+              clipBehavior: Clip.hardEdge,
+              decoration: BoxDecoration(
+                color: panel,
+                borderRadius: BorderRadius.circular(22),
+                border: Border.all(color: neon.withOpacity(.25)),
+              ),
+              child: LayoutBuilder(builder: (context, constraints) {
+                final x = (constraints.maxWidth / 2) +
+                    targetX * constraints.maxWidth / 2.5;
+                final y = (constraints.maxHeight / 2) +
+                    targetY * constraints.maxHeight / 2.5;
+                return Stack(children: [
+                  if (!running)
+                    Center(child: Text(
+                      secondsLeft == 0 ? 'ROUND COMPLETE!' : 'READY?',
+                      style: const TextStyle(
+                        color: neon, fontWeight: FontWeight.w900,
+                        fontSize: 20,
+                      ),
+                    )),
+                  if (running)
+                    Positioned(
+                      left: (x - 35).clamp(0.0,
+                          (constraints.maxWidth - 70).clamp(0.0, double.infinity).toDouble()),
+                      top: (y - 35).clamp(0.0,
+                          (constraints.maxHeight - 70).clamp(0.0, double.infinity).toDouble()),
+                      child: GestureDetector(
+                        onTap: hitTarget,
+                        child: Container(
+                          width: 70,
+                          height: 70,
+                          decoration: BoxDecoration(
+                            shape: BoxShape.circle,
+                            color: neon.withOpacity(.12),
+                            border: Border.all(color: neon, width: 3),
+                          ),
+                          child: const Icon(Icons.gps_fixed,
+                            size: 42, color: neon),
+                        ),
+                      ),
+                    ),
+                ]);
+              }),
+            ),
+          ),
+          const SizedBox(height: 14),
+          Row(children: [
+            Expanded(child: FilledButton.icon(
+              style: FilledButton.styleFrom(
+                backgroundColor: neon,
+                foregroundColor: Colors.black,
+                padding: const EdgeInsets.all(14),
+              ),
+              onPressed: running ? null : startGame,
+              icon: const Icon(Icons.play_arrow),
+              label: const Text('START'),
+            )),
+            const SizedBox(width: 10),
+            Expanded(child: OutlinedButton.icon(
+              style: OutlinedButton.styleFrom(
+                foregroundColor: neon,
+                padding: const EdgeInsets.all(14),
+              ),
+              onPressed: running ? stopGame : null,
+              icon: const Icon(Icons.stop),
+              label: const Text('STOP'),
+            )),
+          ]),
+          const SizedBox(height: 8),
+          SizedBox(
+            width: double.infinity,
+            child: TextButton.icon(
+              onPressed: resetGame,
+              icon: const Icon(Icons.refresh),
+              label: const Text('RESET PRACTICE'),
+              style: TextButton.styleFrom(foregroundColor: neon),
+            ),
+          ),
+        ],
+      ),
+    );
+  }
+
+  Widget _stat(String label, String value) => Expanded(
+    child: Container(
+      padding: const EdgeInsets.symmetric(vertical: 14, horizontal: 6),
+      decoration: BoxDecoration(
+        color: panel, borderRadius: BorderRadius.circular(16),
+      ),
+      child: Column(children: [
+        Text(label, style: const TextStyle(
+          color: muted, fontSize: 10, letterSpacing: 1,
+        )),
+        const SizedBox(height: 5),
+        Text(value, style: const TextStyle(
+          color: neon, fontSize: 22, fontWeight: FontWeight.w900,
+        )),
+      ]),
+    ),
+  );
 }
 
 class _AimPageState extends State<AimPage> {
