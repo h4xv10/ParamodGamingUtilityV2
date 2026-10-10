@@ -1,6 +1,7 @@
 import 'dart:async';
 import 'dart:math';
 import 'package:flutter/material.dart';
+import 'package:flutter/services.dart';
 
 void main() => runApp(const ParamodApp());
 
@@ -149,6 +150,42 @@ class HomePage extends StatelessWidget {
               Text('Practice smarter. Play your way.',
                 style: TextStyle(color: muted)),
             ],
+          ),
+        ),
+        const SizedBox(height: 18),
+        Card(
+          color: panel,
+          shape: RoundedRectangleBorder(
+            borderRadius: BorderRadius.circular(18),
+            side: BorderSide(color: neon.withOpacity(.45)),
+          ),
+          child: ListTile(
+            contentPadding: const EdgeInsets.all(16),
+            leading: const Icon(Icons.sports_esports, color: neon, size: 36),
+            title: const Text('Free Fire MAX Launcher',
+              style: TextStyle(fontWeight: FontWeight.bold)),
+            subtitle: const Text('Open the game if it is installed'),
+            trailing: const Icon(Icons.open_in_new, color: neon),
+            onTap: () async {
+              try {
+                const channel = MethodChannel('com.paramod.gaming/launcher');
+                final result = await channel.invokeMethod<String>('launchGame');
+                if (!context.mounted) return;
+                ScaffoldMessenger.of(context).showSnackBar(
+                  SnackBar(content: Text(result ?? 'Launch request completed')),
+                );
+              } on PlatformException catch (e) {
+                if (!context.mounted) return;
+                ScaffoldMessenger.of(context).showSnackBar(
+                  SnackBar(content: Text(e.message ?? 'Could not open the game')),
+                );
+              } on MissingPluginException {
+                if (!context.mounted) return;
+                ScaffoldMessenger.of(context).showSnackBar(
+                  const SnackBar(content: Text('Launcher is not available in this build yet')),
+                );
+              }
+            },
           ),
         ),
         const SizedBox(height: 26),
