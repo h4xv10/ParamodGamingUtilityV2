@@ -495,6 +495,7 @@ class _AimPageState extends State<AimPage> {
   );
 }
 
+
 class SettingsPage extends StatefulWidget {
   const SettingsPage({super.key});
 
@@ -505,6 +506,12 @@ class SettingsPage extends StatefulWidget {
 class _SettingsPageState extends State<SettingsPage> {
   final sensitivity = TextEditingController();
   bool haptics = true;
+
+  final Map<String, String> presets = const {
+    'Balanced': 'General: 170\nRed Dot: 165\n2x Scope: 150\n4x Scope: 135\nSniper: 85\nFree Look: 120',
+    'Fast Aim': 'General: 190\nRed Dot: 185\n2x Scope: 170\n4x Scope: 155\nSniper: 95\nFree Look: 130',
+    'Precision': 'General: 150\nRed Dot: 145\n2x Scope: 130\n4x Scope: 115\nSniper: 75\nFree Look: 100',
+  };
 
   @override
   void dispose() {
@@ -521,16 +528,45 @@ class _SettingsPageState extends State<SettingsPage> {
           fontSize: 27, fontWeight: FontWeight.w900,
         )),
         const SizedBox(height: 8),
-        const Text('Personal notes for your gaming setup.',
-          style: TextStyle(color: muted)),
+        const Text(
+          'Choose a starting preset, then adjust it to your device and comfort.',
+          style: TextStyle(color: muted),
+        ),
         const SizedBox(height: 24),
-        const SectionTitle('SENSITIVITY NOTES'),
+        const SectionTitle('SENSITIVITY PRESETS'),
+        const SizedBox(height: 10),
+        Wrap(
+          spacing: 8,
+          runSpacing: 8,
+          children: presets.entries.map((entry) => OutlinedButton(
+            style: OutlinedButton.styleFrom(
+              foregroundColor: neon,
+              side: BorderSide(color: neon.withOpacity(.65)),
+            ),
+            onPressed: () {
+              setState(() => sensitivity.text = entry.value);
+              ScaffoldMessenger.of(context).showSnackBar(
+                SnackBar(content: Text('${entry.key} preset applied to notes')),
+              );
+            },
+            child: Text(entry.key),
+          )).toList(),
+        ),
+        const SizedBox(height: 8),
+        const Text(
+          'Presets are starting points, not guaranteed best settings. '
+          'Results depend on your device and play style.',
+          style: TextStyle(color: muted, fontSize: 12),
+        ),
+        const SizedBox(height: 20),
+        const SectionTitle('YOUR SENSITIVITY NOTES'),
         const SizedBox(height: 10),
         TextField(
           controller: sensitivity,
-          maxLines: 4,
+          maxLines: 7,
+          keyboardType: TextInputType.multiline,
           decoration: InputDecoration(
-            hintText: 'Write your sensitivity values here...',
+            hintText: 'Select a preset or write your own values...',
             filled: true,
             fillColor: panel,
             border: OutlineInputBorder(
@@ -539,14 +575,28 @@ class _SettingsPageState extends State<SettingsPage> {
           ),
         ),
         const SizedBox(height: 12),
-        FilledButton(
-          onPressed: () => ScaffoldMessenger.of(context).showSnackBar(
-            const SnackBar(
-              content: Text('Notes are available in this session only.'),
+        Row(children: [
+          Expanded(
+            child: FilledButton(
+              style: FilledButton.styleFrom(
+                backgroundColor: neon,
+                foregroundColor: Colors.black,
+              ),
+              onPressed: () => ScaffoldMessenger.of(context).showSnackBar(
+                const SnackBar(
+                  content: Text('Notes are temporary and reset when the app restarts.'),
+                ),
+              ),
+              child: const Text('DONE'),
             ),
           ),
-          child: const Text('DONE'),
-        ),
+          const SizedBox(width: 10),
+          OutlinedButton(
+            style: OutlinedButton.styleFrom(foregroundColor: neon),
+            onPressed: () => setState(() => sensitivity.clear()),
+            child: const Text('CLEAR'),
+          ),
+        ]),
         const SizedBox(height: 18),
         SwitchListTile(
           value: haptics,
@@ -557,14 +607,14 @@ class _SettingsPageState extends State<SettingsPage> {
         ),
         const SizedBox(height: 12),
         const Text(
-          'This first version does not save notes after closing the app.',
+          'Sensitivity values are editable suggestions. This app does not '
+          'change game settings automatically or modify game files.',
           style: TextStyle(color: muted, fontSize: 12),
         ),
       ],
     );
   }
 }
-
 
 // Basic local login for ARYA-MOD X.
 // For real security, use server-side authentication instead of embedded credentials.
